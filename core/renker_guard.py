@@ -82,8 +82,10 @@ def enforce_capability(target, action: str, config_path=None) -> str | None:
         return None
     try:
         config = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
+    except (OSError, ValueError) as error:
+        return f"Access denied: capability config present but unreadable: {error}"
+    if not isinstance(config, dict):
+        return "Access denied: capability config is malformed"
     if not config.get("enforce", False):
         return None
     if not RENKER_CORE_AVAILABLE:

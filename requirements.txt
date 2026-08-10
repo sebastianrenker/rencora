@@ -33,3 +33,6 @@ google-api-python-client==2.198.0
 # --- Notification-Watcher (actions/notification_watcher.py), nur Windows ---
 winrt-Windows.UI.Notifications.Management; sys_platform == "win32"
 winrt-Windows.UI.Notifications; sys_platform == "win32"
+
+# --- Renker Capability-Enforcement (core/renker_guard.py) ---
+renker-core-authz @ git+https://github.com/sebastianrenker/renker-core-authz@main

@@ -177,6 +177,9 @@ def delete_file(path: str, name: str = "") -> str:
         target = (base / name) if name else base
         if not _is_safe_path(target):
             return f"Access denied: {target}"
+        denial = _capability_denial(target, "filesystem.delete")
+        if denial:
+            return denial
         if not target.exists():
             return f"Not found: {target.name}"
 
@@ -281,6 +284,9 @@ def read_file(path: str, name: str = "", max_chars: int = 4000) -> str:
         target = (base / name) if name else base
         if not _is_safe_path(target):
             return f"Access denied: {target}"
+        denial = _capability_denial(target, "filesystem.read")
+        if denial:
+            return denial
         if not target.exists():
             return f"File not found: {target.name}"
         if not target.is_file():

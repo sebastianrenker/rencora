@@ -27,6 +27,14 @@ def _is_safe_path(target: Path) -> bool:
     except Exception:
         return False
 
+def _capability_denial(target: Path, action: str):
+    try:
+        from core.renker_guard import enforce_capability
+        return enforce_capability(target, action)
+    except Exception:
+        return None
+
+
 def _get_desktop() -> Path:
     if _OS == "Linux":
         xdg = os.environ.get("XDG_DESKTOP_DIR", "")
@@ -141,6 +149,9 @@ def create_file(path: str, name: str = "", content: str = "") -> str:
         target = (base / name) if name else base
         if not _is_safe_path(target):
             return f"Access denied: {target}"
+        denial = _capability_denial(target, "filesystem.write")
+        if denial:
+            return denial
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")
         return f"File created: {target.name}"
@@ -291,6 +302,9 @@ def write_file(path: str, name: str = "", content: str = "",
         target = (base / name) if name else base
         if not _is_safe_path(target):
             return f"Access denied: {target}"
+        denial = _capability_denial(target, "filesystem.write")
+        if denial:
+            return denial
         target.parent.mkdir(parents=True, exist_ok=True)
         mode = "a" if append else "w"
         with open(target, mode, encoding="utf-8") as f:

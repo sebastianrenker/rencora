@@ -16,6 +16,7 @@ _collect_packages = [
     "uvicorn",
     "cv2",
     "mediapipe",
+    "renker_core_authz",
 ]
 
 # ── Pakete, die NIE gebraucht werden und den Build unnötig aufblähen,

@@ -7,16 +7,25 @@ from pathlib import Path
 
 RENKER_CORE_AVAILABLE = False
 try:
-    from renker_core.audit import AuditLog
-    from renker_core.capabilities import Capability, CapabilityStore, PathScope
-    from renker_core.identity import Actor
-    from renker_core.integration import GuardedFilesystem
-    from renker_core.policy import evaluate
+    from renker_core_authz.audit import AuditLog
+    from renker_core_authz.capabilities import Capability, CapabilityStore, PathScope
+    from renker_core_authz.identity import Actor
+    from renker_core_authz.integration import GuardedFilesystem
+    from renker_core_authz.policy import evaluate
 
     RENKER_CORE_AVAILABLE = True
 except ImportError:
-    AuditLog = Capability = CapabilityStore = PathScope = Actor = GuardedFilesystem = None
-    evaluate = None
+    try:
+        from renker_core.audit import AuditLog
+        from renker_core.capabilities import Capability, CapabilityStore, PathScope
+        from renker_core.identity import Actor
+        from renker_core.integration import GuardedFilesystem
+        from renker_core.policy import evaluate
+
+        RENKER_CORE_AVAILABLE = True
+    except ImportError:
+        AuditLog = Capability = CapabilityStore = PathScope = Actor = GuardedFilesystem = None
+        evaluate = None
 
 
 def is_available() -> bool:

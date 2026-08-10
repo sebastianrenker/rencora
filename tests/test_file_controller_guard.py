@@ -9,8 +9,11 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-if importlib.util.find_spec("renker_core") is None:
-    pytest.skip("renker_core not installed", allow_module_level=True)
+if (
+    importlib.util.find_spec("renker_core_authz") is None
+    and importlib.util.find_spec("renker_core") is None
+):
+    pytest.skip("renker-core-authz / renker_core not installed", allow_module_level=True)
 
 import core.renker_guard as rg
 from actions import file_controller

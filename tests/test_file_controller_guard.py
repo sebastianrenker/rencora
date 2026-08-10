@@ -66,3 +66,12 @@ def test_enforced_denies_disabled_flag_allows(tmp_path, monkeypatch):
     out = file_controller.write_file(str(tmp_path / "other"), "d.txt", "ok")
     assert "Written to" in out
     assert (tmp_path / "other" / "d.txt").exists()
+
+
+def test_malformed_config_fails_closed(tmp_path, monkeypatch):
+    cfg = tmp_path / "renker_capabilities.json"
+    cfg.write_text("{ this is not valid json", encoding="utf-8")
+    monkeypatch.setattr(rg, "default_config_path", lambda: cfg)
+    out = file_controller.write_file(str(tmp_path / "drafts"), "e.txt", "no")
+    assert "Access denied" in out
+    assert not (tmp_path / "drafts" / "e.txt").exists()

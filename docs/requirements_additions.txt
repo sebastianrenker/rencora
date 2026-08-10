@@ -1,0 +1,16 @@
+# Ergänzung zu requirements.txt — neue optionale Abhängigkeiten
+
+Diese Zeilen zur bestehenden RENKER_V21/requirements.txt hinzufügen.
+Alle sind in try/except eingebunden — fehlt ein Paket, deaktiviert sich
+nur das jeweilige Feature, der Rest von RENCORA bleibt unberührt.
+
+# Kalender/Mail (Punkt 2 — actions/calendar_mail.py)
+google-auth-oauthlib
+google-api-python-client
+
+# Proaktivitäts-Engine (Punkt 1 — core/proactive_engine.py)
+# psutil ist bereits in requirements.txt vorhanden — keine neue Abhängigkeit.
+
+# Notification-Watcher (Punkt 6 — actions/notification_watcher.py), nur Windows
+winrt-Windows.UI.Notifications.Management; sys_platform == "win32"
+winrt-Windows.UI.Notifications; sys_platform == "win32"

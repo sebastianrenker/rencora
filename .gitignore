@@ -1,0 +1,28 @@
+# Build-/Laufzeit-Artefakte
+dist/
+build/
+__pycache__/
+*.pyc
+*.bak
+.venv/
+venv/
+# Geheimnisse & personenbezogene Laufzeitdaten (nicht sichern/committen)
+config/api_keys.json
+config/certs/
+*.key
+*.crt
+*.pem
+memory/
+database/*
+!database/schema.sql
+*.db
+*.sqlite3
+uploads/
+logs/
+fehler.txt
+
+# Laufzeit-Logs (Crash-Logger)
+*.log
+
+# Nur lokale Dokumentation (nicht veroeffentlichen)
+DOCS.md

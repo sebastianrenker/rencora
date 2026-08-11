@@ -23,6 +23,12 @@ if sys.platform == "win32":
     _sp.Popen.__init__ = _no_window_popen_init
 
 
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "--guard-check":
+    from core.guard_selftest import run as _guard_selftest_run
+
+    raise SystemExit(_guard_selftest_run(sys.argv[2:]))
+
+
 if sys.stdout is None or sys.stderr is None:
     import io
 

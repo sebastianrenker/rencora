@@ -77,12 +77,38 @@ class RencoraFileGuard:
         return self._fs.read(session_actor(session_id), target)
 
 
-def default_config_path() -> Path:
+def _base_dir() -> Path:
     if getattr(sys, "frozen", False):
-        base = Path(sys.executable).parent
-    else:
-        base = Path(__file__).resolve().parent.parent
-    return base / "config" / "renker_capabilities.json"
+        return Path(sys.executable).parent
+    return Path(__file__).resolve().parent.parent
+
+
+def default_config_path() -> Path:
+    return _base_dir() / "config" / "renker_capabilities.json"
+
+
+def _audit_path(config: dict, config_file: Path) -> Path:
+    configured = config.get("audit_path")
+    if configured:
+        return Path(configured)
+    return config_file.parent / "renker_audit.log"
+
+
+def _record_decision(config, config_file, actor, action, target, result) -> None:
+    try:
+        log = AuditLog(_audit_path(config, config_file))
+        outcome = "allowed" if result.decision.value == "ALLOW" else "blocked"
+        log.record(
+            actor=actor.urn,
+            action=action,
+            target=str(target),
+            capability=result.capability_id,
+            policy_decision=result.decision.value,
+            reason=result.reason,
+            outcome=outcome,
+        )
+    except Exception:
+        pass
 
 
 def enforce_capability(target, action: str, config_path=None) -> str | None:
@@ -105,6 +131,7 @@ def enforce_capability(target, action: str, config_path=None) -> str | None:
         result = evaluate(actor=actor, action=action, target=str(target), store=store)
     except Exception as error:
         return f"Access denied: capability check failed: {error}"
+    _record_decision(config, path, actor, action, target, result)
     if result.decision.value == "ALLOW":
         return None
     return f"Access denied by capability policy: {result.reason}"

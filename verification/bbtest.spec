@@ -8,7 +8,7 @@ SCRIPT = os.path.join(SPECPATH, "bbtest_cli.py")
 
 datas = []
 binaries = []
-hiddenimports = ["actions.file_controller", "core.renker_guard"]
+hiddenimports = ["actions.file_controller", "core.renker_guard", "core.guard_selftest"]
 
 d, b, h = collect_all("renker_core_authz")
 datas += d

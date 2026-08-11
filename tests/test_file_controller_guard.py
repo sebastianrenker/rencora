@@ -133,3 +133,19 @@ def test_enforced_delete_allows_in_scope(tmp_path, monkeypatch):
 
     out = file_controller.delete_file(str(tmp_path / "drafts"), "temp.txt")
     assert "Access denied" not in out
+
+
+def test_enforced_decisions_are_audited(tmp_path, monkeypatch):
+    cfg = _config_verbs(tmp_path, ["filesystem.write"], tmp_path / "drafts")
+    monkeypatch.setattr(rg, "default_config_path", lambda: cfg)
+
+    file_controller.write_file(str(tmp_path / "drafts"), "ok.txt", "hi")
+    file_controller.write_file(str(tmp_path / "vault"), "no.txt", "x")
+
+    audit_log = tmp_path / "renker_audit.log"
+    assert audit_log.exists()
+    log = rg.AuditLog(audit_log)
+    events = log.read_all()
+    assert len(events) == 2
+    assert {e.policy_decision for e in events} == {"ALLOW", "DENY"}
+    log.verify()

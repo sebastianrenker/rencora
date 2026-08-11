@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -9,15 +8,16 @@ from pathlib import Path
 
 results = []
 _last = {"stdout": ""}
+_prefix = []
 
 
 def run(exe, op, target=None, content=None):
-    cmd = [str(exe), op]
+    cmd = [str(exe), *_prefix, op]
     if target is not None:
         cmd.append(str(target))
     if content is not None:
         cmd.append(content)
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     _last["stdout"] = proc.stdout.strip()
     return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
 
@@ -40,8 +40,8 @@ def record(name, category, expected, code, out, err, want_exit, want_deny, fs_ok
     print(f"[{'PASS' if passed else 'CRITICAL-FAIL'}] {name}: exit={code} deny={denied} fs={fs_note}")
 
 
-def write_config(sb, enforce=True, session_id="rencora", audit_name="audit.log", verbs=None, raw=None):
-    cfg = sb / "config" / "renker_capabilities.json"
+def write_config(cfg_dir, sb, enforce=True, session_id="rencora", audit_name="audit.log", verbs=None, raw=None):
+    cfg = cfg_dir / "renker_capabilities.json"
     if raw is not None:
         cfg.write_text(raw, encoding="utf-8")
         return
@@ -64,20 +64,30 @@ def write_config(sb, enforce=True, session_id="rencora", audit_name="audit.log",
 
 def main():
     if len(sys.argv) < 2:
-        print("usage: bb_runner.py PATH_TO_rencora_guard_bb.exe")
+        print("usage: bb_runner.py PATH_TO_EXE [prefix-args ...]")
+        print("  onefile harness: bb_runner.py dist/rencora_guard_bb.exe")
+        print("  full RENCORA.exe: bb_runner.py dist/RENCORA/RENCORA.exe --guard-check")
         return 3
-    src_exe = Path(sys.argv[1]).resolve()
+    exe = Path(sys.argv[1]).resolve()
+    _prefix[:] = sys.argv[2:]
+
+    cfg_dir = exe.parent / "config"
+    cfg_dir.mkdir(parents=True, exist_ok=True)
+    cfg_file = cfg_dir / "renker_capabilities.json"
+
     sb = Path(tempfile.mkdtemp(prefix="renker_bb_"))
-    for sub in ("allowed", "protected", "outside", "artifacts", "config"):
+    for sub in ("allowed", "protected", "outside", "artifacts"):
         (sb / sub).mkdir(parents=True, exist_ok=True)
-    exe = sb / "rencora_guard_bb.exe"
-    shutil.copy2(src_exe, exe)
     (sb / "allowed" / "read_me.txt").write_text("allowed content", encoding="utf-8")
     (sb / "allowed" / "to_delete.txt").write_text("delete me", encoding="utf-8")
     (sb / "protected" / "secret.txt").write_text("top secret", encoding="utf-8")
     (sb / "protected" / "keep.txt").write_text("keep me", encoding="utf-8")
 
-    write_config(sb)
+    print("=== EXE self-report ===")
+    _, info_out, _ = run(exe, "info")
+    print(info_out)
+
+    write_config(cfg_dir, sb)
 
     c, o, e = run(exe, "write", sb / "allowed" / "new.txt", "hello")
     record("write_allowed", "WRITE", "ALLOW", c, o, e, 0, False,
@@ -112,25 +122,29 @@ def main():
     )
     print(f"[{'PASS' if ok else 'CRITICAL-FAIL'}] audit: count={count} verify={vout}")
 
-    write_config(sb, session_id="intruder", audit_name="audit_b.log")
+    write_config(cfg_dir, sb, session_id="intruder", audit_name="audit_b.log")
     c, o, e = run(exe, "write", sb / "allowed" / "wrongactor.txt", "x")
     record("bypass_wrong_actor", "BYPASS", "DENY", c, o, e, 2, True,
            not (sb / "allowed" / "wrongactor.txt").exists(), "not-created")
 
-    (sb / "config" / "renker_capabilities.json").unlink()
+    cfg_file.unlink()
     c, o, e = run(exe, "write", sb / "protected" / "baseline.txt", "x")
     record("baseline_no_config", "BASELINE", "ALLOW (no guard)", c, o, e, 0, False,
            (sb / "protected" / "baseline.txt").is_file(), "created (guard off)")
 
-    write_config(sb, raw="{ this is not valid json")
+    write_config(cfg_dir, sb, raw="{ this is not valid json")
     c, o, e = run(exe, "write", sb / "allowed" / "failclosed.txt", "x")
     record("malformed_config_fails_closed", "FAILSAFE", "DENY", c, o, e, 2, True,
            not (sb / "allowed" / "failclosed.txt").exists(), "not-created")
 
-    (sb / "artifacts" / "results.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    if cfg_file.exists():
+        cfg_file.unlink()
+    payload = json.dumps(results, indent=2)
+    (sb / "artifacts" / "results.json").write_text(payload, encoding="utf-8")
+    Path("bb_results.json").write_text(payload, encoding="utf-8")
     total = len(results)
     passed = sum(1 for r in results if r["PASS"])
-    print(f"\n=== SUMMARY === {passed}/{total} PASS   (sandbox: {sb})")
+    print(f"\n=== SUMMARY === {passed}/{total} PASS")
     if passed != total:
         print("CRITICAL FAILURES: " + ", ".join(r["name"] for r in results if not r["PASS"]))
         return 1

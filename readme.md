@@ -69,6 +69,23 @@ als Download bereit.
   das eigene RencoraLM v3 oder Ollama wählen.
 - Details, Bedrohungsmodell und Grenzen: [SECURITY.md](SECURITY.md).
 
+## RENKER-Plattform
+
+Rencora ist die **ACT**-Säule der Renker-Plattform — Infrastruktur für
+vertrauenswürdige, autonome KI-Systeme. Gesamtarchitektur und die anderen
+Säulen: [RENKER_PLATFORM.md](RENKER_PLATFORM.md).
+
+```text
+RENKER — ACT (Rencora) · LEARN (Continuum) · SECURE (RenkerVault)
+                         gemeinsames Fundament: renker-core
+```
+
+| Säule | Rolle | Repo |
+| --- | --- | --- |
+| Continuum | LEARN | https://github.com/sebastianrenker/continuum |
+| RenkerVault | SECURE | https://github.com/sebastianrenker/renkervault |
+| renker-core-authz | öffentlicher Authorization-Core (von Rencora optional konsumiert) | https://github.com/sebastianrenker/renker-core-authz |
+
 ## Lizenz
 
 Nur für persönliche, nicht-kommerzielle Nutzung. © Renker Industries.

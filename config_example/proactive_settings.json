@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "quiet_hours": ["23:00", "07:30"],
+  "cpu_threshold_percent": 90,
+  "cpu_sustained_seconds": 120,
+  "disk_low_gb": 10
+}

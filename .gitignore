@@ -1,0 +1,35 @@
+# Build-/Laufzeit-Artefakte
+dist/
+build/
+__pycache__/
+*.pyc
+*.bak
+.venv/
+venv/
+# Geheimnisse & personenbezogene Laufzeitdaten (nicht sichern/committen)
+config/api_keys.json
+config/certs/
+*.key
+*.crt
+*.pem
+# Persoenliche Memory-DATEN (nie committen) - der Code in memory/ bleibt getrackt
+memory/*.json
+# Runtime-Datenbank (Code database/*.py + schema.sql bleiben getrackt)
+*.db
+*.sqlite3
+uploads/
+logs/
+fehler.txt
+
+# Laufzeit-Logs (Crash-Logger)
+*.log
+
+# Nur lokale Dokumentation (nicht veroeffentlichen)
+DOCS.md
+
+# Installer-Build-Ausgabe
+installer/Output/
+
+# Grosse Fremd-Binaerdatei: wird beim Build verifiziert nachgeladen (tools/fetch_cloudflared.py)
+bin/cloudflared.exe
+bin/cloudflared

@@ -1,0 +1,5 @@
+{
+  "require_confirmation": true,
+  "lan_firewall": true,
+  "allow_network_profile_change": false
+}

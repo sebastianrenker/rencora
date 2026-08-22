@@ -1,0 +1,35 @@
+sounddevice==0.5.5
+google-genai==1.73.1
+pillow==12.3.0
+requests==2.34.2
+beautifulsoup4==4.15.0
+duckduckgo-search==8.1.1
+playwright==1.61.0
+pyautogui==0.9.54
+pyperclip==1.11.0
+pygetwindow==0.0.9
+opencv-python==5.0.0.93
+numpy==2.5.1
+mss==10.2.0
+psutil==7.2.2
+send2trash==2.1.0
+youtube-transcript-api==1.2.4
+python-pptx==1.0.2
+fastapi==0.139.0
+uvicorn[standard]==0.50.2
+cryptography==49.0.0
+python-multipart==0.0.32
+comtypes; sys_platform == "win32"
+pycaw; sys_platform == "win32"
+win10toast; sys_platform == "win32"
+pywinauto; sys_platform == "win32"
+qrcode[pil]==8.2
+websockets>=16.0
+
+# --- Kalender/Mail (actions/calendar_mail.py) ---
+google-auth-oauthlib==1.4.0
+google-api-python-client==2.198.0
+
+# --- Notification-Watcher (actions/notification_watcher.py), nur Windows ---
+winrt-Windows.UI.Notifications.Management; sys_platform == "win32"
+winrt-Windows.UI.Notifications; sys_platform == "win32"
